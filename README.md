@@ -1,4 +1,4 @@
-# mk42 — Recursive Makefile Generator for C Projects
+# mk42 — Makefile Generator for C Projects
 
 ## Overview
 
@@ -49,20 +49,24 @@ The script will:
     Reload your shell configuration to apply the changes immediately.
 
 Verify the installation by running:
-
+```sh
 mk42 --help
+```
 
     Note: The current version does not have a help option; this is a placeholder for future features.
 
-Usage
+## Usage
 
-Navigate to the root directory of your C project:
+### Navigate to the root directory of your C project:
 
+```sh
 cd /path/to/your/project
+```
 
-Run mk42 with the desired executable name:
-
+### Run mk42 with the desired executable name:
+```sh 
 mk42 myapp
+```
 
 This will generate a Makefile that:
 
@@ -72,11 +76,12 @@ This will generate a Makefile that:
 
     Defines standard build rules to compile and link your project.
 
-Compile your project using:
-
+### Compile your project using:
+```sh
 make
+```
 
-Additional useful make commands:
+### Additional useful make commands:
 
     make clean — removes all object (.o) files.
 
@@ -84,7 +89,7 @@ Additional useful make commands:
 
     make re — cleans and rebuilds the entire project.
 
-How It Works
+## How It Works
 
     mk42 scans the current directory and all subdirectories recursively.
 
@@ -112,12 +117,6 @@ Contributions are welcome! Some ideas to improve mk42:
 
     Support other languages or build systems.
 
-    Add verbose/debug modes for troubleshooting.
-
     Implement a help menu for user guidance.
 
     Enhance error handling and reporting.
-
-License
-
-This project is provided "as-is" without warranty. Use and modify it freely.
