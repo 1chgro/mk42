@@ -8,12 +8,14 @@
 #define MAX_PATH 4096 
 
 typedef struct s_list {
-    char *filepath;
-    struct s_list *next;
+    char            *filepath;
+    struct s_list   *next;
 } t_list;
 
-void free_list(t_list *head) {
-    while (head) {
+void free_list(t_list *head)
+{
+    while (head)
+    {
         t_list *tmp = head;
         head = head->next;
         free(tmp->filepath);
@@ -21,22 +23,27 @@ void free_list(t_list *head) {
     }
 }
 
-void list_append(t_list **head, const char *path) {
+void list_append(t_list **head, const char *path)
+{
     t_list *new_node = malloc(sizeof(t_list));
-    if (!new_node) {
+
+    if (!new_node)
+    {
         perror("malloc");
         exit(EXIT_FAILURE);
     }
     new_node->filepath = strdup(path);
-    if (!new_node->filepath) {
+    if (!new_node->filepath)
+    {
         perror("strdup");
         exit(EXIT_FAILURE);
     }
     new_node->next = NULL;
 
-    if (!*head) {
+    if (!*head)
         *head = new_node;
-    } else {
+    else
+    {
         t_list *cur = *head;
         while (cur->next)
             cur = cur->next;
@@ -44,111 +51,126 @@ void list_append(t_list **head, const char *path) {
     }
 }
 
-int is_dir(const char *path) {
+int is_dir(const char *path)
+{
     struct stat st;
+
     if (stat(path, &st) == -1)
-        return 0;
-    return S_ISDIR(st.st_mode);
+        return (0);
+    return (S_ISDIR(st.st_mode));
 }
 
-int has_extension(const char *filename, const char *ext) {
+int has_extension(const char *filename, const char *ext)
+{
     size_t len_filename = strlen(filename);
     size_t len_ext = strlen(ext);
+
     if (len_filename < len_ext)
-        return 0;
-    return strcmp(filename + len_filename - len_ext, ext) == 0;
+        return (0);
+    return (strcmp(filename + len_filename - len_ext, ext) == 0);
 }
 
-void collect_files(const char *basepath, const char *relpath, t_list **c_files, t_list **h_files) {
+void collect_files(const char *basepath, const char *relpath, t_list **c_files, t_list **h_files)
+{
     char path[MAX_PATH];
     DIR *dir;
     struct dirent *entry;
-
     int n;
-    if (strlen(relpath) == 0) {
+
+    if (strlen(relpath) == 0)
         n = snprintf(path, sizeof(path), "%s", basepath);
-    } else {
+    else
         n = snprintf(path, sizeof(path), "%s/%s", basepath, relpath);
-    }
-    if (n < 0 || n >= (int)sizeof(path)) {
+    if (n < 0 || n >= (int)sizeof(path))
+    {
         fprintf(stderr, "Path too long: '%s/%s'\n", basepath, relpath);
-        return;
+        return ;
     }
 
     dir = opendir(path);
-    if (!dir) {
+    if (!dir)
+    {
         fprintf(stderr, "Error opening directory '%s': %s\n", path, strerror(errno));
-        return;
+        return ;
     }
 
-    while ((entry = readdir(dir)) != NULL) {
+    while ((entry = readdir(dir)) != NULL)
+    {
+        char full_path[MAX_PATH];
+        char new_relpath[MAX_PATH];
+
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
             continue;
 
-        char new_relpath[MAX_PATH];
-        if (strlen(relpath) == 0) {
+        if (strlen(relpath) == 0)
             n = snprintf(new_relpath, sizeof(new_relpath), "%s", entry->d_name);
-        } else {
+        else
             n = snprintf(new_relpath, sizeof(new_relpath), "%s/%s", relpath, entry->d_name);
-        }
-        if (n < 0 || n >= (int)sizeof(new_relpath)) {
+        if (n < 0 || n >= (int)sizeof(new_relpath))
+        {
             fprintf(stderr, "Relative path too long: '%s/%s'\n", relpath, entry->d_name);
             continue;
         }
 
-        char full_path[MAX_PATH];
         n = snprintf(full_path, sizeof(full_path), "%s/%s", basepath, new_relpath);
-        if (n < 0 || n >= (int)sizeof(full_path)) {
+        if (n < 0 || n >= (int)sizeof(full_path))
+        {
             fprintf(stderr, "Full path too long: '%s/%s'\n", basepath, new_relpath);
             continue;
         }
 
-        if (is_dir(full_path)) {
+        if (is_dir(full_path))
             collect_files(basepath, new_relpath, c_files, h_files);
-        } else {
-            if (has_extension(entry->d_name, ".c")) {
+        else
+        {
+            if (has_extension(entry->d_name, ".c"))
                 list_append(c_files, new_relpath);
-            } else if (has_extension(entry->d_name, ".h")) {
+            else if (has_extension(entry->d_name, ".h"))
                 list_append(h_files, new_relpath);
-            }
         }
     }
     closedir(dir);
 }
 
 
-void source_to_object(char *dest, const char *src) {
-    strcpy(dest, src);
+void source_to_object(char *dest, const char *src)
+{
     size_t len = strlen(dest);
-    if (len >= 2 && strcmp(dest + len - 2, ".c") == 0) {
+
+    strcpy(dest, src);
+    if (len >= 2 && strcmp(dest + len - 2, ".c") == 0)
+    {
         dest[len - 2] = '\0';
         strcat(dest, ".o");
     }
 }
 
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
+int main(int argc, char *argv[])
+{
+    if (argc != 2)
+    {
         fprintf(stderr, "Usage: %s <executable_name>\n", argv[0]);
-        return EXIT_FAILURE;
+        return (EXIT_FAILURE);
     }
     const char *exe_name = argv[1];
     t_list *c_files = NULL;
     t_list *h_files = NULL;
 
     collect_files(".", "", &c_files, &h_files);
-
-    if (!c_files) {
+    if (!c_files)
+    {
         fprintf(stderr, "No .c files found.\n");
-        return EXIT_FAILURE;
+        return (EXIT_FAILURE);
     }
 
     FILE *mk = fopen("Makefile", "w");
-    if (!mk) {
+    if (!mk)
+    {
         perror("fopen");
         free_list(c_files);
         free_list(h_files);
-        return EXIT_FAILURE;
+        return (EXIT_FAILURE);
     }
 
     fprintf(mk, "NAME = %s\n", exe_name);
@@ -156,19 +178,17 @@ int main(int argc, char *argv[]) {
     fprintf(mk, "CFLAGS = -Wall -Wextra -Werror\n\n");
 
     fprintf(mk, "SRCS =");
-    for (t_list *cur = c_files; cur != NULL; cur = cur->next) {
+    for (t_list *cur = c_files; cur != NULL; cur = cur->next) 
         fprintf(mk, " %s", cur->filepath);
-    }
-    fprintf(mk, "\n");
 
+    fprintf(mk, "\n");
     fprintf(mk, "OBJS = $(SRCS:.c=.o)\n\n");
 
     fprintf(mk, "HEADER =");
-    for (t_list *cur = h_files; cur != NULL; cur = cur->next) {
+    for (t_list *cur = h_files; cur != NULL; cur = cur->next)
         fprintf(mk, " %s", cur->filepath);
-    }
-    fprintf(mk, "\n\n");
 
+    fprintf(mk, "\n\n");
     fprintf(mk, "all: $(NAME)\n\n");
 
     fprintf(mk, "$(NAME): $(OBJS) $(HEADER)\n");
@@ -188,7 +208,6 @@ int main(int argc, char *argv[]) {
     fclose(mk);
     free_list(c_files);
     free_list(h_files);
-
     printf("Makefile generated successfully for '%s'.\n", exe_name);
-    return EXIT_SUCCESS;
+    return (EXIT_SUCCESS);
 }
