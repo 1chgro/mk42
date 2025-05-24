@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-#define MAX_PATH 4096  // Increased buffer size for safety
+#define MAX_PATH 4096 
 
 typedef struct s_list {
     char *filepath;
@@ -64,7 +64,6 @@ void collect_files(const char *basepath, const char *relpath, t_list **c_files, 
     DIR *dir;
     struct dirent *entry;
 
-    // Construct current directory path
     int n;
     if (strlen(relpath) == 0) {
         n = snprintf(path, sizeof(path), "%s", basepath);
@@ -117,8 +116,6 @@ void collect_files(const char *basepath, const char *relpath, t_list **c_files, 
     closedir(dir);
 }
 
-// The rest of your code unchanged
-
 
 void source_to_object(char *dest, const char *src) {
     strcpy(dest, src);
@@ -129,8 +126,6 @@ void source_to_object(char *dest, const char *src) {
     }
 }
 
-
-// ... includes, structs, helpers as before ...
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
